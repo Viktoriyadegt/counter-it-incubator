@@ -1,65 +1,56 @@
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React from 'react';
 import './App.css';
 import {Count} from "./Count";
 import {Settings} from "./Settings";
+import {useDispatch, useSelector} from "react-redux";
+import {AppStateType} from "./BLL/store";
+import {
+    changeMaxValueAC,
+    changeStartValueAC,
+    changeStatusAC,
+    countIncAC,
+    countResetAC,
+    InitialStateType
+} from "./BLL/counter-reducer";
 
 export type StatusType = 'setting' | 'error' | 'count';
 
 function App() {
 
-    let [maxValue, setMaxValue] = useState<number>(0);
-    let [startValue, setStartValue] = useState<number>(0);
-    let [count, setCount] = useState<number>(0);
-    let [status, setStatus] = useState<StatusType>('setting');
+    const dispatch = useDispatch()
+    const {startValue, maxValue, count, status} = useSelector<AppStateType, InitialStateType>(state => state.counter)
 
-    const getFromLocaleStorageHandler = () => {
-
-        let valueStartAsString = localStorage.getItem('startValue')
-        if (valueStartAsString) {
-            let newStartValue = JSON.parse(valueStartAsString)
-            setStartValue(newStartValue)
-            setCount(newStartValue)
-        }
-        let valueMaxAsString = localStorage.getItem('maxValue')
-        if (valueMaxAsString) {
-            let newMaxValue = JSON.parse(valueMaxAsString)
-            setMaxValue(newMaxValue)
-        }
-        let statusAsString = localStorage.getItem('status')
-        if (statusAsString) {
-            let newStatus = JSON.parse(statusAsString)
-            setStatus(newStatus)
-        }
-
-
-    }
-    useEffect(() => {
-        getFromLocaleStorageHandler()
-    }, [])
-
-    useEffect(() => {
-        localStorage.setItem('startValue', JSON.stringify(startValue))
-        localStorage.setItem('maxValue', JSON.stringify(maxValue))
-        localStorage.setItem('status', JSON.stringify(status))
-    }, [startValue, maxValue, status])
 
     const countInc = () => {
-        setCount(count + 1)
+        dispatch(countIncAC())
     }
 
     const countReset = () => {
-        setCount(startValue)
+        dispatch(countResetAC(startValue))
     }
 
     const changeStartValue = (startValue: number) => {
-        setStartValue(startValue)
-        setStatus('setting')
+        if(startValue < 0  || startValue >= maxValue){
+            dispatch(changeStatusAC('error'))
+            dispatch(changeStartValueAC(startValue))
+        }else{
+            dispatch(changeStartValueAC(startValue))
+            dispatch(changeStatusAC('setting'))
+        }
+
+
     }
     const changeMaxValue = (maxValue: number) => {
-        setMaxValue(maxValue)
-        setStatus('setting')
+        if(startValue >= maxValue ||  startValue < 0){
+            dispatch(changeStatusAC('error'))
+            dispatch(changeMaxValueAC(maxValue))
+        }else {
+            dispatch(changeMaxValueAC(maxValue))
+            dispatch(changeStatusAC('setting'))
+        }
     }
-    // debugger
+
+    debugger
     return (
         <div className="App">
             <Count
@@ -71,13 +62,8 @@ function App() {
                 status={status}
             />
             <Settings
-                setCount={setCount}
-                maxValue={maxValue}
-                startValue={startValue}
                 changeMaxValue={changeMaxValue}
                 changeStartValue={changeStartValue}
-                status={status}
-                setStatus={setStatus}
             />
         </div>
     );

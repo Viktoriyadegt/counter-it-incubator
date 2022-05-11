@@ -1,53 +1,53 @@
 import React, {ChangeEvent} from 'react';
 import {Button} from "./Button";
-import {StatusType} from "./App";
+import {useDispatch, useSelector} from "react-redux";
+import {changeStatusAC, InitialStateType, setCountAC} from "./BLL/counter-reducer";
+import {AppStateType} from "./BLL/store";
 
 export type SettingsType = {
-    setCount: (startValue: number) => void
-    maxValue: number
-    startValue: number
     changeStartValue: (value: number) => void
     changeMaxValue: (value: number) => void
-    status: StatusType
-    setStatus: (status: StatusType) => void
 }
 
 export const Settings = (props: SettingsType) => {
-
-    if (props.startValue < 0 || props.maxValue <= props.startValue) {
-        props.setStatus("error")
-    }
+    const dispatch = useDispatch()
+    const {startValue, maxValue, status} = useSelector<AppStateType, InitialStateType>(state => state.counter)
 
     const onChangeMaxValueHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        props.changeMaxValue(JSON.parse(e.currentTarget.value))
+        debugger
+        props.changeMaxValue(+e.currentTarget.value)
     }
     const onChangeStartValueHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        props.changeStartValue(JSON.parse(e.currentTarget.value))
+        debugger
+        props.changeStartValue(+e.currentTarget.value)
+
     }
 
     const onChangeButtonHandler = () => {
-        props.setStatus('count')
-        props.setCount(props.startValue)
+        debugger
+        dispatch(changeStatusAC('count'))
+        dispatch(setCountAC(startValue))
     }
+    debugger
     return (
         <div className='count'>
             <div className={'display'}>
                 <div className={'settings'}>max value
                     <input type={"number"}
-                           value={props.maxValue}
+                           value={maxValue}
                            onChange={onChangeMaxValueHandler}
-                           className={props.status === 'error' ? 'error' : 'input'}/>
+                           className={status === 'error' ? 'error' : 'input'}/>
                 </div>
                 <div className={'settings'}>start value
                     <input type={"number"}
-                           value={props.startValue}
+                           value={startValue}
                            onChange={onChangeStartValueHandler}
-                           className={props.status === 'error' ? 'error' : 'input'}/>
+                           className={status === 'error'? 'error' : 'input'}/>
                 </div>
 
             </div>
             <div className='button-container'>
-                <Button name={'set'} callback={onChangeButtonHandler} disabled={props.status !== 'setting'}/>
+                <Button name={'set'} callback={onChangeButtonHandler} disabled={status !== 'setting'}/>
             </div>
 
         </div>

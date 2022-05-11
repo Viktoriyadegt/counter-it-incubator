@@ -9,7 +9,7 @@ type CountDisplayPropsType = {
 
 }
 export const CountDisplay = (props: CountDisplayPropsType) => {
-
+debugger
     return (
         (props.status === 'count')
             ? <>
